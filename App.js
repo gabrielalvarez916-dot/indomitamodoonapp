@@ -11,8 +11,14 @@ import {
 } from '@expo-google-fonts/montserrat';
 import { supabase } from './src/lib/supabase';
 import PantallaEntrada from './src/screens/PantallaEntrada';
-import PantallaInicio from './src/screens/PantallaInicio';
-import { colores } from './src/theme';
+import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import FeedScreen from './src/screens/FeedScreen';
+import CursoScreen from './src/screens/CursoScreen';
+import { colores, fuentes } from './src/theme';
+
+const Stack = createNativeStackNavigator();
+const temaApp = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: colores.crema } };
 
 export default function App() {
   const [fuentesListas] = useFonts({
@@ -43,9 +49,22 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style={entrar && sesion ? 'dark' : 'light'} />
+      <StatusBar style="light" />
       {entrar && sesion ? (
-        <PantallaInicio sesion={sesion} onSalir={() => setEntrar(false)} />
+        <NavigationContainer theme={temaApp}>
+          <Stack.Navigator
+            screenOptions={{
+              headerStyle: { backgroundColor: colores.negro },
+              headerTintColor: colores.crema,
+              headerTitleStyle: { fontFamily: fuentes.semi },
+              headerShadowVisible: false,
+              headerBackTitle: 'Atrás',
+            }}
+          >
+            <Stack.Screen name="Feed" component={FeedScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Curso" component={CursoScreen} options={{ title: '' }} />
+          </Stack.Navigator>
+        </NavigationContainer>
       ) : (
         <PantallaEntrada
           tieneSesion={sesionCargada ? !!sesion : null}

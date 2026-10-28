@@ -10,6 +10,13 @@ App móvil (Expo / React Native) de la plataforma de cursos.
 
 Si ya hay sesión guardada, después del paso 1 pasa directo a la app.
 
+## Feed y cursos
+- **Feed** (`src/screens/FeedScreen.js`): banner publicitario 4:1 (tabla `banners`), buscador por curso o docente, filtro por categoría y tarjetas estilo Udemy.
+- **Curso** (`src/screens/CursoScreen.js`): portada y datos, lo que aprenderás, qué incluye, contenido, requisitos, descripción, docente, valoraciones y "los estudiantes también compraron".
+- Datos: funciones SQL `cursos_feed()` y `cursos_tambien_compraron()` (solo lectura, solo cursos publicados). Ver `src/lib/cursosApi.js`.
+- Banners: se cargan en la tabla `banners` de Supabase (`imagen_url`, y `curso_id` **o** `link_destino`). Sin banners se muestra el banner propio de Modo On.
+- Pendiente: pago/inscripción y reproductor de clases (el botón de compra hoy avisa "Próximamente").
+
 ## Pendiente antes de probar el login
 - Pegar el **Client ID web de Google** en `src/lib/googleAuth.js` (`WEB_CLIENT_ID`).
 - Agregar `google-services.json` (Firebase) en la raíz para Android y registrar el SHA-1 del build.

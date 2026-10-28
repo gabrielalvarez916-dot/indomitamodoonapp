@@ -35,3 +35,14 @@ export async function ingresarConGoogle() {
     return { ok: false, mensaje: 'No pudimos conectar con Google. Probá de nuevo.' };
   }
 }
+
+// Cierra la sesión de Supabase y la de Google (así la próxima vez deja elegir cuenta).
+export async function cerrarSesion() {
+  try {
+    configurar();
+    await GoogleSignin.signOut();
+  } catch (e) {
+    // si no había sesión de Google, seguimos igual
+  }
+  await supabase.auth.signOut();
+}

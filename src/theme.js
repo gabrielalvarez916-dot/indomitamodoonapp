@@ -6,6 +6,9 @@ export const colores = {
   tintaSuave: '#5A5A52',
   apagado: '#3A3A34',
   error: '#9B1C1C',
+  blanco: '#FFFFFF',
+  borde: '#E4DFD0',
+  estrella: '#E8A400',
 };
 
 export const fuentes = {
