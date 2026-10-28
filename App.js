@@ -13,11 +13,36 @@ import { supabase } from './src/lib/supabase';
 import PantallaEntrada from './src/screens/PantallaEntrada';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import FeedScreen from './src/screens/FeedScreen';
 import CursoScreen from './src/screens/CursoScreen';
+import MisCursosScreen from './src/screens/MisCursosScreen';
+import PerfilScreen from './src/screens/PerfilScreen';
+import SerDocenteScreen from './src/screens/SerDocenteScreen';
+import NavPrincipal from './src/components/NavPrincipal';
+import EncabezadoApp from './src/components/EncabezadoApp';
 import { colores, fuentes } from './src/theme';
 
+// Misma estructura que Indómita Love Club: un Tab.Navigator con la barra fija abajo
+// (NavPrincipal) y el encabezado negro fijo arriba (EncabezadoApp), dentro de un stack raíz.
+// El curso se abre como pantalla del stack raíz: queda por encima de las pestañas.
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+function Pestañas() {
+  return (
+    <Tab.Navigator
+      initialRouteName="feed"
+      tabBar={(props) => <NavPrincipal {...props} />}
+      screenOptions={{ header: () => <EncabezadoApp />, sceneStyle: { backgroundColor: colores.crema } }}
+    >
+      <Tab.Screen name="feed" component={FeedScreen} />
+      <Tab.Screen name="miscursos" component={MisCursosScreen} />
+      <Tab.Screen name="perfil" component={PerfilScreen} />
+      <Tab.Screen name="serdocente" component={SerDocenteScreen} />
+    </Tab.Navigator>
+  );
+}
 const temaApp = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: colores.crema } };
 
 export default function App() {
@@ -61,7 +86,7 @@ export default function App() {
               headerBackTitle: 'Atrás',
             }}
           >
-            <Stack.Screen name="Feed" component={FeedScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Pestañas" component={Pestañas} options={{ headerShown: false }} />
             <Stack.Screen name="Curso" component={CursoScreen} options={{ title: '' }} />
           </Stack.Navigator>
         </NavigationContainer>

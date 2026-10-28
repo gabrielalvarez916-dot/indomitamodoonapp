@@ -1,23 +1,19 @@
 // FeedScreen.js — donde cae cada usuario al entrar.
-// Arriba: header con logo, banner publicitario (4:1), buscador (curso o docente),
+// Arriba (fijo en todas las pestañas): encabezado negro con logo y "Salir". Acá: banner publicitario (4:1), buscador (curso o docente),
 // filtro por tipo de curso y la lista de cursos estilo Udemy.
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import LogoModoOn from '../components/LogoModoOn';
 import BannerPublicidad from '../components/BannerPublicidad';
 import BuscadorCursos from '../components/BuscadorCursos';
 import FiltroCategorias from '../components/FiltroCategorias';
 import TarjetaCurso from '../components/TarjetaCurso';
 import { obtenerBanners, obtenerCategorias, obtenerCursosFeed } from '../lib/cursosApi';
-import { cerrarSesion } from '../lib/googleAuth';
 import { normalizar } from '../lib/formato';
 import { colores, fuentes } from '../theme';
 
 export default function FeedScreen({ navigation }) {
-  const insets = useSafeAreaInsets();
   const [cursos, setCursos] = useState([]);
   const [banners, setBanners] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -119,21 +115,13 @@ export default function FeedScreen({ navigation }) {
 
   return (
     <View style={styles.pantalla}>
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
-        <LogoModoOn size={22} conMarca={false} />
-        <Pressable onPress={cerrarSesion} hitSlop={12} style={styles.salir} accessibilityRole="button" accessibilityLabel="Cerrar sesión">
-          <Ionicons name="log-out-outline" size={20} color={colores.crema} />
-          <Text style={styles.salirTexto}>Salir</Text>
-        </Pressable>
-      </View>
-
       <FlatList
         data={visibles}
         keyExtractor={(c) => c.id}
         renderItem={({ item }) => <TarjetaCurso curso={item} onPress={() => abrirCurso(item.id)} />}
         ListHeaderComponent={encabezado}
         ListEmptyComponent={vacio}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+        contentContainerStyle={{ paddingBottom: 24 }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         initialNumToRender={3}
@@ -147,9 +135,6 @@ export default function FeedScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   pantalla: { flex: 1, backgroundColor: colores.crema },
-  header: { backgroundColor: colores.negro, paddingHorizontal: 16, paddingBottom: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  salir: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  salirTexto: { fontFamily: fuentes.semi, fontSize: 13, color: colores.crema },
   bloqueBusqueda: { paddingTop: 16, gap: 12 },
   contador: { fontFamily: fuentes.semi, fontSize: 13, color: colores.tintaSuave, paddingHorizontal: 18, paddingTop: 18, paddingBottom: 12 },
   vacio: { alignItems: 'center', paddingHorizontal: 32, paddingTop: 56, gap: 8 },
