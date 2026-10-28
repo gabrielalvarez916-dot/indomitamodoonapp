@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "Indómita Modo On",
+    "slug": "indomitamodoonapp",
+    "scheme": "indomitamodoon",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#111111"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.indomitamodoon.app"
+    },
+    "android": {
+      "package": "com.indomitamodoon.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#111111"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "plugins": ["@react-native-google-signin/google-signin", "expo-font"]
+  }
+}
