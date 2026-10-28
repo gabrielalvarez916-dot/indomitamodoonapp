@@ -1,16 +1,50 @@
 // BannerPublicidad.js — banner de arriba del feed (espacio publicitario).
 // Mismo formato que Indómita Love Club: ancho completo, proporción 4:1, carrusel
 // con autoplay (10 s por defecto o `duracion_segundos` de cada banner) y puntitos.
+// Soporta imagen y video (el video se reproduce solo en silencio y en loop).
 // Destino excluyente: un curso dentro de la app, o un link externo.
 // Si todavía no hay banners cargados, muestra el banner propio de Modo On.
 
 import { useEffect, useRef, useState } from 'react';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Image } from 'expo-image';
+import { useVideoPlayer, VideoView } from 'expo-video';
+import { useIsFocused } from '@react-navigation/native';
 import LogoModoOn from './LogoModoOn';
 import { colores, fuentes } from '../theme';
 
 const DURACION_DEFAULT_MS = 10000;
+
+function SlideVideo({ uri, activo }) {
+  const player = useVideoPlayer(uri, (p) => {
+    p.loop = true;
+    p.muted = true;
+    if (activo) p.play();
+  });
+
+  // Solo el banner visible se reproduce; los vecinos quedan en pausa, listos para mostrarse al deslizar.
+  useEffect(() => {
+    if (activo) player.play();
+    else player.pause();
+  }, [activo, player]);
+
+  return (
+    <VideoView
+      style={StyleSheet.absoluteFill}
+      player={player}
+      nativeControls={false}
+      contentFit="cover"
+      allowsPictureInPicture={false}
+      startsPictureInPictureAutomatically={false}
+    />
+  );
+}
+
+// El banner actual y sus dos vecinos (con vuelta al inicio): como máximo 3 reproductores a la vez.
+function esCercano(i, actual, total) {
+  if (total <= 0) return false;
+  return i === actual || i === (actual + 1) % total || i === (actual - 1 + total) % total;
+}
 
 export default function BannerPublicidad({ banners, onAbrirCurso }) {
   const { width } = useWindowDimensions();
@@ -18,6 +52,7 @@ export default function BannerPublicidad({ banners, onAbrirCurso }) {
   const [indice, setIndice] = useState(0);
   const scrollRef = useRef(null);
   const timerRef = useRef(null);
+  const enFoco = useIsFocused(); // al salir de la pestaña se sueltan los reproductores
 
   useEffect(() => {
     clearTimeout(timerRef.current);
@@ -54,7 +89,7 @@ export default function BannerPublicidad({ banners, onAbrirCurso }) {
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={(e) => setIndice(Math.round(e.nativeEvent.contentOffset.x / width))}
       >
-        {banners.map((b) => (
+        {banners.map((b, i) => (
           <Pressable
             key={b.id}
             onPress={() => alTocar(b)}
@@ -63,7 +98,15 @@ export default function BannerPublicidad({ banners, onAbrirCurso }) {
             accessibilityRole="imagebutton"
             accessibilityLabel="Publicidad"
           >
-            <Image source={{ uri: b.imagen_url }} style={StyleSheet.absoluteFill} contentFit="cover" cachePolicy="memory-disk" recyclingKey={b.id} />
+            {b.tipo === 'video' ? (
+              enFoco && esCercano(i, indice, banners.length) ? (
+                <SlideVideo key={b.id} uri={b.imagen_url} activo={i === indice} />
+              ) : (
+                <View style={StyleSheet.absoluteFill} />
+              )
+            ) : (
+              <Image source={{ uri: b.imagen_url }} style={StyleSheet.absoluteFill} contentFit="cover" cachePolicy="memory-disk" recyclingKey={b.id} />
+            )}
           </Pressable>
         ))}
       </ScrollView>

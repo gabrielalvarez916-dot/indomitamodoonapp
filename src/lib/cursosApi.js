@@ -7,7 +7,6 @@ export async function obtenerBanners() {
     .select('id, imagen_url, link_destino, curso_id, tipo, duracion_segundos')
     .eq('activo', true)
     .eq('ubicacion', 'feed')
-    .eq('tipo', 'imagen') // el video se suma más adelante
     .order('orden', { ascending: true });
   if (error) throw error;
   return data || [];
