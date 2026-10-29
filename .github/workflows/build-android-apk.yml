@@ -1,0 +1,80 @@
+name: Compilar APK de prueba (Modo On)
+
+# Se corre a mano: pestaña Actions → "Compilar APK de prueba (Modo On)" → Run workflow.
+# Genera un APK instalable (sin Google Play) firmado con la llave estándar de prueba de Android,
+# así que el SHA-1 es SIEMPRE el mismo. Se ve en el resumen de la corrida y en el log.
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Liberar espacio en disco del runner
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/share/boost /opt/az 2>/dev/null || true
+          sudo docker image prune -a -f 2>/dev/null || true
+          df -h /
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Add swap space (el runner tiene 7 GB de RAM y Android necesita más)
+        run: |
+          SWAPFILE=/mnt/swapfile
+          sudo fallocate -l 10G "$SWAPFILE" || sudo dd if=/dev/zero of="$SWAPFILE" bs=1M count=10240
+          sudo chmod 600 "$SWAPFILE"
+          sudo mkswap "$SWAPFILE"
+          sudo swapon "$SWAPFILE"
+          free -h
+
+      - name: Mover cachés de Gradle y tmp a /mnt
+        run: |
+          sudo mkdir -p /mnt/gradle-home /mnt/tmp
+          sudo chown -R $USER:$USER /mnt/gradle-home /mnt/tmp
+          echo "GRADLE_USER_HOME=/mnt/gradle-home" >> "$GITHUB_ENV"
+          echo "TMPDIR=/mnt/tmp" >> "$GITHUB_ENV"
+
+      - name: Generar proyecto Android (expo prebuild)
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Dar más memoria a Gradle
+        run: |
+          sed -i 's/^org.gradle.jvmargs=.*/org.gradle.jvmargs=-Xmx4096m -XX:MaxMetaspaceSize=1024m/' android/gradle.properties
+
+      - name: Compilar APK
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Mostrar el SHA-1 (el que se pega en Google Cloud)
+        run: |
+          SHA=$(keytool -list -v -keystore android/app/debug.keystore -alias androiddebugkey -storepass android -keypass android 2>/dev/null | grep "SHA1:" | sed 's/.*SHA1: //')
+          echo "SHA-1 de la app: $SHA"
+          {
+            echo "## SHA-1 para Google Cloud"
+            echo ""
+            echo "\`$SHA\`"
+            echo ""
+            echo "Paquete: \`com.indomitamodoon.app\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Subir el APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: modo-on-apk
+          path: android/app/build/outputs/apk/release/*.apk
