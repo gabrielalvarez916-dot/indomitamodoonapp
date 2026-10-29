@@ -4,8 +4,8 @@ import { supabase } from './supabase';
 // Client ID de tipo "Aplicación web" del proyecto de Google Cloud que ya usa
 // Supabase para Modo On (Supabase → Authentication → Providers → Google).
 // La librería nativa lo pide como "webClientId" para emitir un id_token válido.
-// ⚠️ PENDIENTE: pegar acá el Client ID real.
-export const WEB_CLIENT_ID = 'PENDIENTE.apps.googleusercontent.com';
+// (Client ID real ya cargado.)
+export const WEB_CLIENT_ID = '431980349307-72vmfd659mgn3961se628m0lpebfel52.apps.googleusercontent.com';
 
 let configurado = false;
 function configurar() {
