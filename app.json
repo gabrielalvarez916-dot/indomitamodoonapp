@@ -25,6 +25,16 @@
       },
       "edgeToEdgeEnabled": true
     },
-    "plugins": ["@react-native-google-signin/google-signin", "expo-font"]
+    "plugins": [
+      "@react-native-google-signin/google-signin",
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Indómita Modo On necesita acceder a tus fotos y videos para subir la portada y las clases de tus cursos."
+        }
+      ],
+      "expo-document-picker"
+    ]
   }
 }

@@ -1,5 +1,6 @@
 // FormularioBase.js — piezas compartidas por Perfil y Ser docente: contenedor con teclado,
 // título de pantalla, campo de texto, aviso y botón.
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { colores, fuentes } from '../theme';
 
@@ -44,12 +45,12 @@ export function Aviso({ texto, error }) {
   );
 }
 
-export function Boton({ texto, onPress, cargando, lima }) {
+export function Boton({ texto, onPress, cargando, lima, deshabilitado }) {
   return (
     <Pressable
       onPress={onPress}
-      disabled={cargando}
-      style={({ pressed }) => [styles.boton, lima && styles.botonLima, (pressed || cargando) && { opacity: 0.7 }]}
+      disabled={cargando || deshabilitado}
+      style={({ pressed }) => [styles.boton, lima && styles.botonLima, (pressed || cargando) && { opacity: 0.7 }, deshabilitado && { opacity: 0.4 }]}
       accessibilityRole="button"
     >
       {cargando ? (
@@ -58,6 +59,65 @@ export function Boton({ texto, onPress, cargando, lima }) {
         <Text style={[styles.botonTexto, lima && { color: colores.negro }]}>{texto}</Text>
       )}
     </Pressable>
+  );
+}
+
+
+// Botón chico (acciones dentro de tarjetas). mal = rojo, suave = borde claro.
+export function BotonChico({ texto, onPress, mal, suave, lima, deshabilitado }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={deshabilitado}
+      style={({ pressed }) => [
+        styles.chico, mal && styles.chicoMal, suave && styles.chicoSuave, lima && styles.chicoLima,
+        (pressed || deshabilitado) && { opacity: deshabilitado ? 0.4 : 0.7 },
+      ]}
+      accessibilityRole="button"
+    >
+      <Text style={[styles.chicoTexto, mal && { color: '#B3261E' }, lima && { color: colores.negro }]}>{texto}</Text>
+    </Pressable>
+  );
+}
+
+// Elegir una opción entre pocas (categoría, precio). opciones = [{ valor, etiqueta }]
+export function Chips({ opciones, valor, onElegir, deshabilitado }) {
+  return (
+    <View style={styles.chips}>
+      {opciones.map((o) => {
+        const activo = o.valor === valor;
+        return (
+          <Pressable
+            key={String(o.valor)}
+            disabled={deshabilitado}
+            onPress={() => onElegir(o.valor)}
+            style={[styles.chip, activo && styles.chipActivo, deshabilitado && !activo && { opacity: 0.5 }]}
+            accessibilityRole="button"
+            accessibilityState={{ selected: activo }}
+          >
+            <Text style={[styles.chipTexto, activo && { color: colores.lima }]}>{o.etiqueta}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+// Campo que guarda solo al salir de él. onGuardar(valor) devuelve una promesa; si falla, vuelve al valor anterior.
+export function CampoGuardable({ etiqueta, valor, onGuardar, onError, ...props }) {
+  const [texto, setTexto] = useState(valor || '');
+  useEffect(() => { setTexto(valor || ''); }, [valor]);
+  return (
+    <Campo
+      etiqueta={etiqueta}
+      {...props}
+      value={texto}
+      onChangeText={setTexto}
+      onEndEditing={async () => {
+        if (texto.trim() === (valor || '').trim()) return;
+        try { await onGuardar(texto); } catch (e) { setTexto(valor || ''); if (onError) onError(e); }
+      }}
+    />
   );
 }
 
@@ -86,4 +146,13 @@ const styles = StyleSheet.create({
   boton: { backgroundColor: colores.negro, borderRadius: 999, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', minHeight: 48 },
   botonLima: { backgroundColor: colores.lima },
   botonTexto: { fontFamily: fuentes.semi, fontSize: 15, color: colores.crema },
+  chico: { borderWidth: 1.5, borderColor: colores.negro, borderRadius: 999, paddingVertical: 8, paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center', backgroundColor: colores.blanco },
+  chicoMal: { borderColor: '#B3261E' },
+  chicoSuave: { borderColor: colores.borde },
+  chicoLima: { backgroundColor: colores.lima, borderColor: colores.lima },
+  chicoTexto: { fontFamily: fuentes.semi, fontSize: 13, color: colores.negro },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: { borderWidth: 1.5, borderColor: colores.borde, borderRadius: 999, paddingVertical: 8, paddingHorizontal: 14, backgroundColor: colores.blanco },
+  chipActivo: { backgroundColor: colores.negro, borderColor: colores.negro },
+  chipTexto: { fontFamily: fuentes.semi, fontSize: 13, color: colores.negro },
 });

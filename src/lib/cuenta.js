@@ -67,7 +67,7 @@ export async function obtenerSolicitudDocente() {
 
 export async function enviarSolicitudDocente({ nombre, bio }) {
   const u = await usuarioActual();
-  const { error } = await supabase.from('docentes').insert({ usuario_id: u.id, nombre_publico: nombre, bio_publica: bio });
+  const { error } = await supabase.from('docentes').insert({ usuario_id: u.id, nombre_publico: nombre, bio_publica: bio || null });
   if (error) throw error;
 }
 

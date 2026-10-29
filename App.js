@@ -19,6 +19,7 @@ import CursoScreen from './src/screens/CursoScreen';
 import MisCursosScreen from './src/screens/MisCursosScreen';
 import PerfilScreen from './src/screens/PerfilScreen';
 import SerDocenteScreen from './src/screens/SerDocenteScreen';
+import EditarCursoScreen from './src/screens/EditarCursoScreen';
 import NavPrincipal from './src/components/NavPrincipal';
 import EncabezadoApp from './src/components/EncabezadoApp';
 import { colores, fuentes } from './src/theme';
@@ -88,6 +89,7 @@ export default function App() {
           >
             <Stack.Screen name="Pestañas" component={Pestañas} options={{ headerShown: false }} />
             <Stack.Screen name="Curso" component={CursoScreen} options={{ title: '' }} />
+            <Stack.Screen name="EditarCurso" component={EditarCursoScreen} options={{ title: 'Curso' }} />
           </Stack.Navigator>
         </NavigationContainer>
       ) : (
